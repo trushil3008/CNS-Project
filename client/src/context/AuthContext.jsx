@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useCallback, useContext, useState } from 'react';
 import axios from 'axios';
 
 const AuthContext = createContext(null);
@@ -46,8 +46,25 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const getAdminUsers = useCallback(async (adminToken) => {
+    setLoading(true);
+    try {
+      const response = await api.get('/api/auth/admin/users', {
+        headers: {
+          Authorization: `Bearer ${adminToken}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Admin users fetch error:', error.response?.data || error.message);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ loading, login, register }}>
+    <AuthContext.Provider value={{ loading, login, register, getAdminUsers }}>
       {children}
     </AuthContext.Provider>
   );

@@ -17,7 +17,15 @@ function Login() {
     setLoading(true);
     
     try {
-      await login(email, password);
+      const response = await login(email, password);
+
+      if (response?.isAdmin && response?.adminToken) {
+        localStorage.setItem('adminToken', response.adminToken);
+        navigate('/admin');
+        return;
+      }
+
+      localStorage.removeItem('adminToken');
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Unable to save login details. Please try again.');
@@ -92,10 +100,10 @@ function Login() {
 
       <footer className="auth-footer">
         <div className="footer-links">
-          <a href="#">Contact Us</a>
-          <a href="#">Privacy</a>
-          <a href="#">Legal</a>
-          <a href="#">Worldwide</a>
+          <a href="https://www.paypal.com/in/cshelp/contact-us">Contact Us</a>
+          <a href="https://www.paypal.com/in/legalhub/paypal/privacy-full">Privacy</a>
+          <a href="https://www.paypal.com/in/legalhub/paypal/home">Legal</a>
+          <a href="https://www.paypal.com/in/webapps/mpp/country-worldwide">Worldwide</a>
         </div>
       </footer>
     </div>

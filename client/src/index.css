@@ -398,6 +398,72 @@ body {
   font-size: 1.1rem;
 }
 
+/* Admin Panel */
+.admin-page {
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+.admin-header {
+  background: #003087;
+  color: white;
+  padding: 16px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-header h1 {
+  font-size: 1.5rem;
+}
+
+.admin-header button {
+  background: transparent;
+  color: white;
+  border: 1px solid white;
+  padding: 8px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.admin-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.admin-table-wrapper {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e6ebee;
+}
+
+.admin-table th {
+  background: #f2f7fb;
+  color: #2c2e2f;
+  font-weight: 600;
+}
+
+.admin-empty-row {
+  text-align: center !important;
+  color: #687173;
+  padding: 24px !important;
+}
+
 /* Responsive */
 @media (max-width: 500px) {
   .auth-card {
