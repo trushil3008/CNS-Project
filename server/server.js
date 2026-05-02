@@ -42,6 +42,7 @@ app.use(express.json());
 
 // Connect to MongoDB
 const mongoUri = process.env.MONGO_URI;
+const mongoDirectUri = process.env.MONGO_URI_DIRECT;
 
 if (!mongoUri) {
   console.error('MongoDB URI is missing. Set MONGO_URI in .env');
@@ -50,18 +51,59 @@ if (!mongoUri) {
 
 console.log('Attempting to connect to MongoDB...');
 
-mongoose.connect(mongoUri, {
+const mongoOptions = {
   serverSelectionTimeoutMS: 10000,
   socketTimeoutMS: 45000,
-})
-  .then(() => {
+  family: 4
+};
+
+function isSrvDnsError(err) {
+  if (!err) return false;
+
+  return (
+    err.syscall === 'querySrv' ||
+    err.code === 'ECONNREFUSED' ||
+    err.code === 'ENOTFOUND' ||
+    err.code === 'EAI_AGAIN' ||
+    err.code === 'ETIMEOUT' ||
+    (typeof err.message === 'string' && err.message.toLowerCase().includes('querysrv'))
+  );
+}
+
+async function connectToMongo() {
+  try {
+    await mongoose.connect(mongoUri, mongoOptions);
     console.log('Connected to MongoDB successfully!');
     console.log('Database:', mongoose.connection.db.databaseName);
-  })
-  .catch((err) => {
+    return;
+  } catch (err) {
     console.error('MongoDB connection error:', err.message);
+
+    if (isSrvDnsError(err) && mongoDirectUri) {
+      console.warn('SRV DNS lookup failed. Retrying with MONGO_URI_DIRECT...');
+
+      try {
+        await mongoose.connect(mongoDirectUri, mongoOptions);
+        console.log('Connected to MongoDB successfully using MONGO_URI_DIRECT!');
+        console.log('Database:', mongoose.connection.db.databaseName);
+        return;
+      } catch (directErr) {
+        console.error('MongoDB direct URI connection failed:', directErr.message);
+        console.error('Full error:', directErr);
+        return;
+      }
+    }
+
+    if (isSrvDnsError(err) && !mongoDirectUri) {
+      console.error('SRV DNS lookup failed and MONGO_URI_DIRECT is not set.');
+      console.error('Add MONGO_URI_DIRECT to .env using the non-SRV Atlas connection string.');
+    }
+
     console.error('Full error:', err);
-  });
+  }
+}
+
+connectToMongo();
 
 // Monitor connection events
 mongoose.connection.on('error', (err) => {
